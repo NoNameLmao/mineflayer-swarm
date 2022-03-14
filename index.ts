@@ -1,6 +1,6 @@
 import { createBot, Bot } from 'mineflayer'
 import { ClientOptions } from 'minecraft-protocol'
-import EventEmitter from 'eventemitter3'
+import EventEmitter from 'events'
 import { ok } from 'assert'
 
 if (typeof process !== 'undefined' && parseInt(process.versions.node.split('.')[0]) < 14) {
