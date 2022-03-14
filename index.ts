@@ -30,11 +30,9 @@ export class Swarm extends EventEmitter {
         this.plugins = []
         this.options = options
         this.on('error', (bot, ...errors) => console.error(...errors))
-        // remove disconnected members
         this.on('end', bot => {
             this.bots = this.bots.filter(x => bot.username !== x.username)
         })
-        // plugin injection
         this.on('inject_allowed', bot => {
             bot.swarmOptions.injectAllowed = true
             this.plugins.forEach((plugin) => {
@@ -43,18 +41,15 @@ export class Swarm extends EventEmitter {
         })
     }
     addSwarmMember(auth: Partial<ClientOptions>) {
-        // create bot and save its options
         const botOptions: Partial<ClientOptions> = { ...this.options, ...auth }
         const bot: SwarmBot = createBot(botOptions as ClientOptions)
         bot.swarmOptions = new BotSwarmData()
         bot.swarmOptions.botOptions = botOptions as ClientOptions
-        // monkey patch bot.emit
         const oldEmit = bot.emit
         bot.emit = (event, ...args) => {
             this.emit(event, this, ...args)
             return oldEmit(event, ...args)
         }
-        // add bot to swarm
         this.bots.push(bot)
     }
     isSwarmMember = (username: string) => this.bots.some(bot => bot.username === username)
@@ -80,9 +75,7 @@ export class Swarm extends EventEmitter {
 }
 
 export function createSwarm(auths: Array<Partial<ClientOptions>>, options: Partial<ClientOptions> = {}) {
-    // create swarm object
     const swarm = new Swarm(options)
-    // init swarm
     auths.forEach(swarm.addSwarmMember)
     return swarm
 }
