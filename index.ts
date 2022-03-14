@@ -13,7 +13,7 @@ type Plugin = (((bot: Bot) => any) | ((bot: Bot, opts: ClientOptions) => any))
 
 class BotSwarmData {
     botOptions?: ClientOptions
-    injectAllowed: boolean = false
+    injectAllowed = false
 }
 
 interface SwarmBot extends Bot {
@@ -29,15 +29,11 @@ export class Swarm extends EventEmitter {
         this.bots = []
         this.plugins = []
         this.options = options
-        this.on('error', (bot, ...errors) => console.error(...errors))
-        this.on('end', bot => {
-            this.bots = this.bots.filter(x => bot.username !== x.username)
-        })
+        this.on('error', (_, ...errors) => console.error(...errors))
+        this.on('end', bot => this.bots = this.bots.filter(x => bot.username !== x.username))
         this.on('inject_allowed', bot => {
             bot.swarmOptions.injectAllowed = true
-            this.plugins.forEach((plugin) => {
-                plugin(bot, bot.swarmOptions.botOptions)
-            })
+            this.plugins.forEach(plugin => plugin(bot, bot.swarmOptions.botOptions))
         })
     }
     addSwarmMember(auth: Partial<ClientOptions>) {
@@ -74,7 +70,7 @@ export class Swarm extends EventEmitter {
     hasPlugin = (plugin: Plugin) => this.plugins.includes(plugin)
 }
 
-export function createSwarm(auths: Array<Partial<ClientOptions>>, options: Partial<ClientOptions> = {}) {
+export function createSwarm(auths: Partial<ClientOptions>[], options: Partial<ClientOptions> = {}) {
     const swarm = new Swarm(options)
     auths.forEach(swarm.addSwarmMember)
     return swarm
